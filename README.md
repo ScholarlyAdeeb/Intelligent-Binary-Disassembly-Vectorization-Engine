@@ -92,11 +92,6 @@ AI BUILDER/
 
 ### 1. Clone the Repository
 
-```bash
-git clone <your-repository-url>
-cd AI-BUILDER
-```
-
 ### 2. Install Dependencies
 
 ```bash
