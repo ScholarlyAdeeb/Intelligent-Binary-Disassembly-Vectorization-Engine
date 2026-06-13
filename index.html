@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Coding Platform</title>
+    <link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
+    <link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+    <link href="[https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap](https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap)" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            min-height: 100vh;
+            background-color: #030407;
+            background-image: radial-gradient(
+                circle 600px at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(12, 20, 42, 0.75) 0%,
+                rgba(3, 4, 7, 0.98) 80%
+            );
+            color: #f8fafc;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+            transition: background 0.1s ease;
+        }
+
+        /* Welcome Gate Overlay */
+        .welcome-gate-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #030407;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: 24px;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glowing-orb-mesh {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #6366f1 0%, rgba(99,102,241,0) 70%);
+            filter: blur(8px);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        .welcome-gate-text {
+            font-size: 2.4rem;
+            font-weight: 500;
+            min-height: 80px;
+            background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            transition: opacity 0.3s ease;
+        }
+
+        .language-token-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            max-width: 640px;
+            margin-top: 10px;
+        }
+
+        .lang-token {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(248, 250, 252, 0.8);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .lang-token:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        /* Sidebar Design */
+        .sidebar {
+            width: 280px;
+            background: rgba(13, 14, 21, 0.85);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            height: 100vh;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header svg { stroke: #a5b4fc; }
+
+        .new-project-btn {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px dashed rgba(99, 102, 241, 0.3);
+            color: #a5b4fc;
+            border-radius: 14px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .new-project-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+            color: #ffffff;
+        }
+
+        .project-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(148, 163, 184, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .project-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .project-item {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .project-item.active {
+            background: rgba(99, 102, 241, 0.12);
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .project-name {
+            font-size: 0.9rem;
+            color: rgba(248, 250, 252, 0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .project-dir {
+            font-size: 0.7rem;
+            color: rgba(148, 163, 184, 0.4);
+            margin-top: 2px;
+        }
+
+        .delete-project-btn {
+            background: transparent;
+            border: none;
+            color: rgba(248, 250, 252, 0.2);
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .project-item:hover .delete-project-btn { opacity: 1; }
+        .delete-project-btn:hover { color: #f87171; }
+
+        /* Main App Board layout grid */
+        .main-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: relative;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .header-bar {
+            padding: 16px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(13, 14, 21, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .active-project-info { display: flex; align-items: center; gap: 10px; }
+        .active-indicator { width: 8px; height: 8px; border-radius: 50%; background: #34d399; }
+        #active-project-title { font-size: 1.05rem; color: #ffffff; }
+
+        .explore-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(248, 250, 252, 0.85);
+            border-radius: 12px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-feed {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px 60px 20px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            width: 100%;
+            max-width: 840px;
+            margin: 0 auto;
+        }
+
+        .chat-bubble { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .bubble-header { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: rgba(148, 163, 184, 0.4); }
+        .user-bubble { align-items: flex-end; }
+        .user-bubble .bubble-content { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 20px 20px 4px 20px; padding: 14px 20px; color: #f1f5f9; }
+
+        .terminal-card { width: 100%; background: rgba(10, 11, 16, 0.75); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 18px 20px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #e2e8f0; }
+        .terminal-card-header { display: flex; justify-content: space-between; color: rgba(148, 163, 184, 0.4); font-size: 0.75rem; border-bottom: 1px solid rgba(255, 255, 255, 0.03); padding-bottom: 8px; }
+        .terminal-body { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; margin-top: 10px; }
+
+        .input-panel { padding: 20px 60px 36px 60px; width: 100%; max-width: 840px; margin: 0 auto; }
+        .input-capsule { background: rgba(18, 20, 29, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; padding: 16px 24px; display: flex; flex-direction: column; }
+        
+        textarea { width: 100%; min-height: 44px; background: transparent; border: none; outline: none; color: #f1f5f9; font-size: 1rem; resize: none; }
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 12px; }
+        .shortcut-hint { font-size: 0.8rem; color: rgba(148, 163, 184, 0.35); }
+        
+        .run-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; border-radius: 20px; padding: 8px 24px; cursor: pointer; font-weight: 500; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(3, 4, 7, 0.7); backdrop-filter: blur(12px); z-index: 100; display: none; justify-content: center; align-items: center; }
+        .modal-card { width: 90%; max-width: 800px; height: 520px; background: rgba(18, 20, 29, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; }
+        .files-sidebar { width: 240px; border-right: 1px solid rgba(255, 255, 255, 0.04); overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .instructions-panel { flex: 1; padding: 24px 32px; overflow-y: auto; }
+        .command-box { background: rgba(10, 11, 16, 0.95); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 12px; padding: 14px 18px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #a5b4fc; display: flex; justify-content: space-between; }
+        .copy-btn { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+
+        .status-panel { margin-top: auto; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; gap: 12px; font-size: 0.8rem; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; }
+        .status-pill { padding: 2px 6px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; }
+        .status-pill.success { background: rgba(52, 211, 153, 0.1); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.2); }
+        .status-pill.danger { background: rgba(248, 113, 113, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
+        .gpu-stats-box { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); padding: 8px 10px; border-radius: 8px; }
+        .gpu-stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.7rem; }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; filter: blur(8px); }
+            50% { transform: scale(1.15); opacity: 1; filter: blur(4px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-gate" class="welcome-gate-overlay">
+        <div class="glowing-orb-mesh"></div>
+        <div id="rotating-greeting" class="welcome-gate-text">How can I help with your health today?</div>
+        <div class="language-token-row">
+            <button class="lang-token" onclick="selectLanguage('en', 'Ask your local agent to code...')">English</button>
+            <button class="lang-token" onclick="selectLanguage('hi', 'अपने लोकल एजेंट से कोड करवाएं...')">हिन्दी</button>
+            <button class="lang-token" onclick="selectLanguage('ta', 'உங்கள் லோக்கல் ஏஜென்ட்டிடம் கோட் கேட்கவும்...')">தமிழ்</button>
+            <button class="lang-token" onclick="selectLanguage('bn', 'আপনার লোকাল এজেন্টকে কোড করতে বলুন...')">বাংলা</button>
+            <button class="lang-token" onclick="selectLanguage('te', 'మీ లోకల్ ఏజెంట్‌ను కోడ్ అడగండి...')">తెలుగు</button>
+            <button class="lang-token" onclick="selectLanguage('mr', 'तुमच्या लोकल एजंटला कोड लिहायला सांगा...')">मराठी</button>
+            <button class="lang-token" onclick="selectLanguage('kn', 'ನಿಮ್ಮ ಲೋಕಲ್ ಏಜೆಂಟ್‌ಗೆ ಕೋಡ್ ಮಾಡಲು ಹೇಳಿ...')">ಕನ್ನಡ</button>
+            <button class="lang-token" onclick="selectLanguage('gu', 'તમારા લોકલ એજન્ટ પાસે કોડ કરાવો...')">ગુજરાતી</button>
+            <button class="lang-token" onclick="selectLanguage('ml', 'നിങ്ങളുടെ ലോക്കൽ ഏജന്റുകളോട് കോഡ് ചോദിക്കുക...')">മലയാളം</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+            <span id="label-workspace">Agent Workspace</span>
+        </div>
+        
+        <button id="new-project-btn" class="new-project-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span id="label-new-project">New Project</span>
+        </button>
+        
+        <div class="project-section-title" id="label-projects-header">Projects</div>
+        <div id="project-list" class="project-list"></div>
+
+        <div class="status-panel">
+            <div class="status-panel-title">System Status</div>
+            <div class="status-row">
+                <span>Backend</span>
+                <span id="backend-status-val" class="status-pill danger">Offline</span>
+            </div>
+            <div class="status-row">
+                <span>Ollama</span>
+                <span id="ollama-status-val" class="status-pill danger">Offline</span>
+            </div>
+            <div id="gpu-stats-container" style="display: none;">
+                <div class="gpu-stats-box">
+                    <div id="gpu-name-val" style="font-size: 0.75rem; font-weight: 500;">NVIDIA GPU</div>
+                    <div class="gpu-stat-grid">
+                        <div id="gpu-temp-val">Temp: -</div>
+                        <div id="gpu-load-val">Load: -</div>
+                        <div id="gpu-vram-val" style="grid-column: span 2;">VRAM: -</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-panel" id="main-application-frame">
+        <div class="header-bar">
+            <div class="active-project-info">
+                <span class="active-indicator"></span>
+                <span id="active-project-title">Default Project</span>
+            </div>
+            <button id="explore-files-btn" class="explore-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span id="label-explore">Explore Files</span>
+            </button>
+        </div>
+        
+        <div id="chat-feed" class="chat-feed"></div>
+
+        <div class="input-panel">
+            <div class="input-capsule">
+                <textarea id="prompt-input" placeholder="Ask your local agent to code..." rows="1"></textarea>
+                <div class="action-row">
+                    <span class="shortcut-hint" id="label-shortcut">Press Ctrl + Enter to run</span>
+                    <button id="run-btn" class="run-btn">
+                        <span id="label-run-engine">Run Agent Engine</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="files-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;"><span>Project File Explorer</span></div>
+                <button id="close-modal-btn" style="background:transparent; border:none; color:white; cursor:pointer;">Close</button>
+            </div>
+            <div style="display: flex; flex: 1; overflow: hidden;">
+                <div id="modal-files-sidebar" class="files-sidebar"></div>
+                <div class="instructions-panel">
+                    <div id="instruction-placeholder">Select a file to view execution profiles</div>
+                    <div id="instruction-content" style="display: none;">
+                        <h3 id="selected-file-name">filename.py</h3>
+                        <p id="selected-file-path" style="font-family: monospace; font-size: 0.8rem; color: gray;"></p>
+                        <p id="selected-file-desc" style="margin-top: 10px;"></p>
+                        <div id="command-container" class="command-box" style="margin-top: 14px;">
+                            <span id="selected-file-command"></span>
+                            <button id="copy-command-btn" class="copy-btn">Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gate = document.getElementById('welcome-gate');
+        const frame = document.getElementById('main-application-frame');
+        const textGreeting = document.getElementById('rotating-greeting');
+        const textarea = document.getElementById('prompt-input');
+        const runBtn = document.getElementById('run-btn');
+        const projectListEl = document.getElementById('project-list');
+        const chatFeed = document.getElementById('chat-feed');
+
+        const greetings = [
+            "How can I help with your health today?",
+            "मैं आज आपके स्वास्थ्य में किस प्रकार सहायता कर सकता हूँ?",
+            "இன்று உங்கள் ஆரோக்கியത്തിന് நான் எவ்வாறு உதவ முடியும்?",
+            "আজ আপনার স্বাস্থ্যের জন্য আমি কীভাবে সাহায্য করতে পারি?",
+            "ఈరోజు మీ ആരോഗ്യానికి నేను ఏ విధంగా సహాయം చేయగలను?",
+            "मी आज तुमच्या आरोग्यासाठी कशी मदत करू शकतो?",
+            "ಇಂದು ನಿಮ್ಮ ಆರೋಗ್ಯಕ್ಕೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?",
+            "હું આજે તમારા સ્વાસ્થ્ય માટે શું મદદ કરી શકું?",
+            "ഇന്ന് നിങ്ങളുടെ ആരോഗ്യ കാര്യങ്ങളിൽ എനിക്ക് എങ്ങനെ സഹായിക്കാനാകും?"
+        ];
+
+        let index = 0;
+        const intervalLoop = setInterval(() => {
+            textGreeting.style.opacity = '0';
+            setTimeout(() => {
+                index = (index + 1) % greetings.length;
+                textGreeting.textContent = greetings[index];
+                textGreeting.style.opacity = '1';
+            }, 300);
+        }, 1200);
+
+        function selectLanguage(token, placeholder) {
+            clearInterval(intervalLoop);
+            localStorage.setItem('selected_lang', token);
+            textarea.placeholder = placeholder;
+            
+            // Map regional sidebar elements dynamically
+            if(token === 'hi') {
+                document.getElementById('label-workspace').textContent = "एजेंट वर्कस्पेस";
+                document.getElementById('label-new-project').textContent = "नया प्रोजेक्ट";
+                document.getElementById('label-projects-header').textContent = "प्रोजेक्ट्स सूची";
+                document.getElementById('label-explore').textContent = "फाइलें देखें";
+                document.getElementById('label-run-engine').textContent = "एजेंट इंजन चलाएं";
+                document.getElementById('label-shortcut').textContent = "रन करने के लिए Ctrl + Enter दबाएं";
+            }
+
+            gate.style.opacity = '0';
+            gate.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                gate.style.display = 'none';
+                frame.style.opacity = '1';
+                frame.style.pointerEvents = 'all';
+            }, 600);
+        }
+
+        let projects = [];
+        let activeProjectId = 'default';
+
+        document.addEventListener('mousemove', (e) => {
+            document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
+            document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchProjects();
+            const cached = localStorage.getItem('selected_lang');
+            if (cached) {
+                // If language token exists, fast-track straight to the main developer environment console
+                gate.style.display = 'none';
+                frame.style.opacity = '1';
+                frame.style.pointerEvents = 'all';
+            }
+        });
+
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        textarea.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                runAgentEngine();
+            }
+        });
+
+        runBtn.addEventListener('click', runAgentEngine);
+
+        document.getElementById('new-project-btn').addEventListener('click', async () => {
+            const name = prompt("Enter new project name:");
+            if (!name || !name.trim()) return;
+            const res = await fetch('/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name.trim() })
+            });
+            if (res.ok) {
+                const newProj = await res.json();
+                activeProjectId = newProj.id;
+                await fetchProjects();
+            }
+        });
+
+        async function fetchProjects() {
+            const res = await fetch('/projects');
+            if (res.ok) {
+                projects = await res.json();
+                if (!projects.some(p => p.id === activeProjectId)) {
+                    activeProjectId = projects.length > 0 ? projects.id : 'default';
+                }
+                renderProjectsList();
+                loadActiveProjectHistory();
+            }
+        }
+
+        function renderProjectsList() {
+            projectListEl.innerHTML = '';
+            projects.forEach(project => {
+                const item = document.createElement('div');
+                item.className = `project-item ${project.id === activeProjectId ? 'active' : ''}`;
+                item.addEventListener('click', () => {
+                    activeProjectId = project.id;
+                    renderProjectsList();
+                    loadActiveProjectHistory();
+                });
+
+                const meta = document.createElement('div');
+                meta.className = 'project-meta';
+                meta.innerHTML = `<span class="project-name">${project.name}</span><span class="project-dir">projects/${project.id}/</span>`;
+                
+                const del = document.createElement('button');
+                del.className = 'delete-project-btn';
+                del.textContent = "Remove";
+                del.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    if(confirm("Confirm project data pipeline deletion?")) {
+                        const delRes = await fetch(`/projects/${project.id}`, { method: 'DELETE' });
+                        if(delRes.ok) {
+                            activeProjectId = 'default';
+                            await fetchProjects();
+                        }
+                    }
+                });
+
+                item.appendChild(meta);
+                item.appendChild(del);
+                projectListEl.appendChild(item);
+            });
+        }
+
+        function loadActiveProjectHistory() {
+            const project = projects.find(p => p.id === activeProjectId);
+            if (!project) return;
+            document.getElementById('active-project-title').textContent = project.name;
+            chatFeed.innerHTML = '';
+            if (project.history) {
+                project.history.forEach(msg => renderChatMessage(msg.role, msg.text));
+            }
+            chatFeed.scrollTop = chatFeed.scrollHeight;
+        }
+
+        function renderChatMessage(role, text) {
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${role === 'user' ? 'user-bubble' : 'agent-bubble'}`;
+            if(role === 'user') {
+                bubble.innerHTML = `<div class="bubble-header">User</div><div class="user-bubble .bubble-content">${text}</div>`;
+            } else {
+                let logs = '';
+                text.split('\n').forEach(l => { if(l.trim()) logs += `<div>${l}</div>`; });
+                bubble.innerHTML = `<div class="terminal-card"><div class="terminal-card-header">TERMINAL AGENT OVERLAYS</div><div class="terminal-body">${logs}</div></div>`;
+            }
+            chatFeed.appendChild(bubble);
+        }
+
+        async function runAgentEngine() {
+            const prompt = textarea.value.trim();
+            if (!prompt) return;
+            textarea.value = '';
+            renderChatMessage('user', prompt);
+            
+            const agentBubble = document.createElement('div');
+            agentBubble.className = 'chat-bubble agent-bubble';
+            agentBubble.innerHTML = `<div class="terminal-card"><div id="live-body" class="terminal-body"></div></div>`;
+            chatFeed.appendChild(agentBubble);
+
+            const body = document.getElementById('live-body');
+            try {
+                const res = await fetch('/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, project_id: activeProjectId })
+                });
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                while(true) {
+                    const { value, done } = await reader.read();
+                    if(done) break;
+                    const lines = decoder.decode(value).split('\n');
+                    lines.forEach(l => {
+                        if(l.startsWith('data: ')) {
+                            const d = document.createElement('div');
+                            d.textContent = l.slice(6);
+                            body.appendChild(d);
+                        }
+                    });
+                }
+            } catch (e) { console.error(e); }
+            body.removeAttribute('id');
+            await fetchProjects();
+        }
+
+        // Explorer Frame Modals
+        document.getElementById('explore-files-btn').addEventListener('click', async () => {
+            document.getElementById('files-modal').style.display = 'flex';
+            const res = await fetch(`/projects/${activeProjectId}/files`);
+            if(res.ok) {
+                const list = await res.json();
+                const side = document.getElementById('modal-files-sidebar');
+                side.innerHTML = '';
+                list.forEach(f => {
+                    const el = document.createElement('div');
+                    el.className = 'file-item';
+                    el.textContent = f;
+                    el.onclick = () => {
+                        document.getElementById('instruction-placeholder').style.display = 'none';
+                        document.getElementById('instruction-content').style.display = 'block';
+                        document.getElementById('selected-file-name').textContent = f;
+                        document.getElementById('selected-file-path').textContent = `projects/${activeProjectId}/${f}`;
+                        document.getElementById('selected-file-desc').textContent = "Run this file directly via terminal execution vectors:";
+                        document.getElementById('selected-file-command').textContent = `python projects/${activeProjectId}/${f}`;
+                    };
+                    side.appendChild(el);
+                });
+            }
+        });
+
+        document.getElementById('close-modal-btn').onclick = () => { document.getElementById('files-modal').style.display = 'none'; };
+
+        async function updateSystemStatus() {
+            try {
+                const res = await fetch('/backend-status');
+                if (res.ok) {
+                    const data = await res.json();
+                    const b = document.getElementById('backend-status-val');
+                    b.textContent = data.backend_initialized ? 'Active' : 'Offline';
+                    b.className = data.backend_initialized ? 'status-pill success' : 'status-pill danger';
+
+                    const o = document.getElementById('ollama-status-val');
+                    o.textContent = data.ollama && data.ollama.status === 'online' ? 'Online' : 'Offline';
+                    o.className = data.ollama && data.ollama.status === 'online' ? 'status-pill success' : 'status-pill danger';
+
+                    const gpuContainer = document.getElementById('gpu-stats-container');
+                    if (data.gpu && data.gpu.status === 'success' && data.gpu.gpus.length > 0) {
+                        gpuContainer.style.display = 'block';
+                        const g = data.gpu.gpus;
+                        document.getElementById('gpu-name-val').textContent = g.name;
+                        document.getElementById('gpu-temp-val').textContent = `Temp: ${g.temperature}`;
+                        document.getElementById('gpu-load-val').textContent = `Load: ${g.utilization}`;
+                        document.getElementById('gpu-vram-val').textContent = `VRAM: ${g.memory_used} / ${g.memory_total}`;
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+        setInterval(updateSystemStatus, 4000);
+        updateSystemStatus();
+
+        const shutdownSource = new EventSource('/events');
+        shutdownSource.onmessage = function(e) {
+            if (e.data === 'shutdown') {
+                document.body.innerHTML = "<h1 style='color: white; text-align: center; margin-top: 20%;'>Backend Server Offline</h1>";
+            }
+        };
+    </script>
+</body>
+</html>
