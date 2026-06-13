@@ -13,6 +13,4 @@ An automated static analysis and natural language processing (NLP) pipeline desi
 * [ ] **Live Telemetry Visualization:** Integrating multi-threaded tracking views to graph similarity distribution clusters in real-time.
 
 ## 🛠️ Local Installation & Setup
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/YOUR_GITHUB_USERNAME/intelligent-binary-vectorizer.git](https://github.com/YOUR_GITHUB_USERNAME/intelligent-binary-vectorizer.git)
+1. Clone the repository
